@@ -1,5 +1,8 @@
-;; -*- coding: utf-8 -*-
-(add-to-list 'load-path (expand-file-name "~/.emacs.d"))
+;;; This file bootstraps the configuration, which is divided into
+;;; a number of other files.
+
+(add-to-list 'load-path user-emacs-directory)
+(require 'init-benchmarking) ;; Measure startup time
 
 ;;----------------------------------------------------------------------------
 ;; Which functionality to enable (use t or nil for true and false)
@@ -10,13 +13,24 @@
 (defconst *is-cocoa-emacs* (and *is-a-mac* (eq window-system 'ns)))
 
 ;;----------------------------------------------------------------------------
-;; Load configs for specific features and modes
+;; Bootstrap config
 ;;----------------------------------------------------------------------------
 (require 'init-compat)
 (require 'init-utils)
 (require 'init-site-lisp) ;; Must come before elpa, as it may provide package.el
-(require 'init-elpa)
+(require 'init-elpa)      ;; Machinery for installing required packages
 (require 'init-exec-path) ;; Set up $PATH
+
+;;----------------------------------------------------------------------------
+;; Load configs for specific features and modes
+;;----------------------------------------------------------------------------
+
+(require-package 'wgrep)
+(require-package 'project-local-variables)
+(require-package 'diminish)
+(require-package 'scratch)
+(require-package 'mwe-log-commands)
+
 (require 'init-frame-hooks)
 (require 'init-xterm)
 (require 'init-themes)
@@ -61,7 +75,9 @@
 (require 'init-haskell)
 (require 'init-ruby-mode)
 (require 'init-rails)
+(require 'init-sql)
 
+(require 'init-paredit)
 (require 'init-lisp)
 (require 'init-slime)
 (require 'init-clojure)
@@ -73,6 +89,15 @@
 (require 'init-marmalade)
 (require 'init-misc)
 
+;; Extra packages which don't require any configuration
+
+(require-package 'gnuplot)
+(require-package 'lua-mode)
+(require-package 'htmlize)
+(require-package 'dsvn)
+(when *is-a-mac*
+  (require-package 'osx-location))
+(require-package 'regex-tool)
 
 ;;----------------------------------------------------------------------------
 ;; Allow access from emacsclient
@@ -85,8 +110,9 @@
 ;;----------------------------------------------------------------------------
 ;; Variables configured via the interactive 'customize' interface
 ;;----------------------------------------------------------------------------
-(setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 
 ;;----------------------------------------------------------------------------
@@ -102,5 +128,6 @@
 
 
 ;; Local Variables:
+;; coding: utf-8
 ;; no-byte-compile: t
 ;; End:
